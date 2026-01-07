@@ -87,6 +87,28 @@ pipeline {
                 '''
             }
         }
+
+        stage('E2E Prod') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.57.0-noble'
+                    reuseNode true
+                }
+            }
+            environment {
+                CI_ENVIRONMENT_URL = 'https://bejewelled-granita-b55148.netlify.app'
+            }
+            steps {
+                sh '''
+                    npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, icon: '', keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Test Report Prod', reportTitles: 'Test Results Home', useWrapperFileDirectly: true])
+                }
+            }
+        }
     }
 
 }
